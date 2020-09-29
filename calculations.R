@@ -3,7 +3,7 @@ library(broom)
 
 # Import CO2 concentration df
 # 
-
+#
 # create a new datafram with the slope of the trendline of the flux, R squared of the trendline, the mean of air temp and PAR
 #https://dplyr.tidyverse.org/reference/group_map.html group_map?
 #https://www.r-bloggers.com/2016/09/running-a-model-on-separate-groups/

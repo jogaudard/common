@@ -3,6 +3,7 @@
 # match flux will attribute CO2 concentration to each flux measurements
 # raw_flux is the continuous measurement from the logger
 # field_record is the manually written record of what plot was measured when
+
 match.flux <- function(raw_flux, field_record){
  co2conc <- full_join(raw_flux, field_record, by = c("Datetime" = "Start"), keep = TRUE) %>% #joining both dataset in one
     fill(PAR,Temp_air,Site,Type,Replicate,Starting_time,Date,Start,End) %>% #filling all rows (except Remarks) with data from above
