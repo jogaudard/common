@@ -4,29 +4,27 @@
 # raw_flux is the continuous measurement from the logger
 # field_record is the manually written record of what plot was measured when
 match.flux <- function(raw_flux, field_record){
-  co2conc <- fuzzy_left_join( #there is probably a better way to do that than fuzzy join, I need to find out. Fuzzy join is using too much memory
-    raw_flux, field_record,
-    by = c(
-      "Datetime" = "Start",
-      "Datetime" = "End"
-    ),
-    match_fun = list(`>=`, `<=`)
-  ) %>% 
-    drop_na(Start) %>% 
-    mutate(ID = group_indices(., Date, Site, Type, Replicate)) %>% #gives a unique ID to each flux
+ co2conc <- full_join(raw_flux, field_record, by = c("Datetime" = "Start"), keep = TRUE) %>% #joining both dataset in one
+    fill(PAR,Temp_air,Site,Type,Replicate,Starting_time,Date,Start,End) %>% #filling all rows (except Remarks) with data from above
+    group_by(Date, Site, Type, Replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
+    fill(Remarks) %>% 
+    ungroup() %>% 
+    mutate(ID = group_indices(., Date, Site, Type, Replicate)) %>% #assigning a unique ID to each flux, useful for plotting uzw
+    filter(Datetime <= End) %>% #cropping the part of the flux that is after the End. No need to filter the start because we used by = c("Datetime" = "Start") in full_join
     select(Datetime, CO2, PAR, Temp_air, Site, Type, Replicate, ID, Remarks, Date)
+  
+  
   return(co2conc)
 }
 
 
 # flux.calc is to calculate fluxes based on a dataset with CO2 concentration vs time
 # it requires broom
-
 flux.calc <- function(co2conc, # dataset of CO2 concentration versus time (output of match.flux)
                       chamber_volume = 24.5, # volume of the flux chamber in L, default for Three-D chamber (25x24.5x40cm)
                       tube_volume = 0.075, # volume of the tubing in L, default for summer 2020 setup
                       atm_pressure = 1, # atmoshperic pressure, assumed 1 atm
-                      plot_area # area of the plot in m^2
+                      plot_area = 0.0625 # area of the plot in m^2, default for Three-D
                       )
   {
 slopesCO2 <- co2conc %>% 
@@ -52,23 +50,23 @@ slopesCO2 <- co2conc %>%
          # & p.value < 0.05 #keeping only the significant fluxes
   ) %>% 
   select(ID, Site, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate) %>% #select the column we need, dump the rest
-  distinct() #remove duplicate
+  distinct() #remove duplicate. Because of the nesting, we get one row per Datetime entry. We only need one row per flux. Select() gets rid of Datetime and then distinct() is cleaning those extra rows.
 
 
-# vol = (24.5 + 0.075) #volume of the chamber (40x24.5x25cm) + tubings in (2x300x0.2x0.2xpi cm) L
-# P = 1 #atmospherique pressure, assumed at 1 atm
+
 R = 0.082057 #gas constant, in L*atm*K^(-1)*mol^(-1)
 vol = chamber_volume + tube_volume
-# A = 0.0625 #area of plot in m^2
+
 
 #calculate fluxes using the trendline and the air temperature
 
-
-fluxes_bio102_final <- slopesCO2 %>% 
+fluxes_final <- slopesCO2 %>% 
   mutate(flux = (estimate * atm_pressure * vol)/(R * Temp_airavg * plot_area) #gives flux in micromol/s/m^2
          *3600 #secs to hours
          /1000 #micromol to mmol
   ) %>%  #flux is now in mmol/m^2/h, which is more common
   select(ID, Site, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, flux)
+
+return(fluxes_final)
 
 }
