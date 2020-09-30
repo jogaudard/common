@@ -30,7 +30,7 @@ flux.calc <- function(co2conc, # dataset of CO2 concentration versus time (outpu
   {
   R = 0.082057 #gas constant, in L*atm*K^(-1)*mol^(-1)
   vol = chamber_volume + tube_volume
-slopesCO2 <- co2conc %>% 
+fluxes_final <- co2conc %>% 
   # group_by(ID) %>% 
   nest(-ID) %>% 
   mutate(
