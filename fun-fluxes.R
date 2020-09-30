@@ -52,7 +52,7 @@ fluxes_final <- co2conc %>%
          # & r.squared >= 0.7 #keeping only trendline with an r.squared above or equal to 0.7. Below that it means that the data are not good quality enough
          # & p.value < 0.05 #keeping only the significant fluxes
   ) %>% 
-  # select(ID, Plot_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate, Campaign) %>% #select the column we need, dump the rest
+  select(ID, Plot_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate, Campaign) %>% #select the column we need, dump the rest
   distinct() %>%  #remove duplicate. Because of the nesting, we get one row per Datetime entry. We only need one row per flux. Select() gets rid of Datetime and then distinct() is cleaning those extra rows.
 #calculate fluxes using the trendline and the air temperature
   mutate(flux = (estimate * atm_pressure * vol)/(R * Temp_airavg * plot_area) #gives flux in micromol/s/m^2
