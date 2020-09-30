@@ -28,6 +28,8 @@ flux.calc <- function(co2conc, # dataset of CO2 concentration versus time (outpu
                       plot_area = 0.0625 # area of the plot in m^2, default for Three-D
                       )
   {
+  R = 0.082057 #gas constant, in L*atm*K^(-1)*mol^(-1)
+  vol = chamber_volume + tube_volume
 slopesCO2 <- co2conc %>% 
   # group_by(ID) %>% 
   nest(-ID) %>% 
@@ -50,23 +52,14 @@ slopesCO2 <- co2conc %>%
          # & r.squared >= 0.7 #keeping only trendline with an r.squared above or equal to 0.7. Below that it means that the data are not good quality enough
          # & p.value < 0.05 #keeping only the significant fluxes
   ) %>% 
-  select(ID, Plot_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate) %>% #select the column we need, dump the rest
-  distinct() #remove duplicate. Because of the nesting, we get one row per Datetime entry. We only need one row per flux. Select() gets rid of Datetime and then distinct() is cleaning those extra rows.
-
-
-
-R = 0.082057 #gas constant, in L*atm*K^(-1)*mol^(-1)
-vol = chamber_volume + tube_volume
-
-
+  # select(ID, Plot_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate, Campaign) %>% #select the column we need, dump the rest
+  distinct() %>%  #remove duplicate. Because of the nesting, we get one row per Datetime entry. We only need one row per flux. Select() gets rid of Datetime and then distinct() is cleaning those extra rows.
 #calculate fluxes using the trendline and the air temperature
-
-fluxes_final <- slopesCO2 %>% 
   mutate(flux = (estimate * atm_pressure * vol)/(R * Temp_airavg * plot_area) #gives flux in micromol/s/m^2
          *3600 #secs to hours
          /1000 #micromol to mmol
   ) %>%  #flux is now in mmol/m^2/h, which is more common
-  select(ID, Plot_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, flux)
+  select(ID, Plot_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, flux, Campaign)
 
 return(fluxes_final)
 
