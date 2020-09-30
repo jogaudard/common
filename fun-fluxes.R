@@ -7,12 +7,12 @@
 match.flux <- function(raw_flux, field_record){
  co2conc <- full_join(raw_flux, field_record, by = c("Datetime" = "Start"), keep = TRUE) %>% #joining both dataset in one
     fill(PAR,Temp_air,Turf_ID,Type,Replicate,Campaign,Starting_time,Date,Start,End) %>% #filling all rows (except Remarks) with data from above
-    group_by(Date, Site, Type, Replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
+    group_by(Date, Turf_ID, Type, Replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
     fill(Remarks) %>% 
     ungroup() %>% 
-    mutate(ID = group_indices(., Date, Site, Type, Replicate)) %>% #assigning a unique ID to each flux, useful for plotting uzw
+    mutate(ID = group_indices(., Date, Turf_ID, Type, Replicate)) %>% #assigning a unique ID to each flux, useful for plotting uzw
     filter(Datetime <= End) %>% #cropping the part of the flux that is after the End. No need to filter the start because we used by = c("Datetime" = "Start") in full_join
-    select(Datetime, CO2, PAR, Temp_air, Site, Type, Replicate, Campaign, ID, Remarks, Date)
+    select(Datetime, CO2, PAR, Temp_air, Turf_ID, Type, Replicate, Campaign, ID, Remarks, Date)
   
   
   return(co2conc)
@@ -50,7 +50,7 @@ slopesCO2 <- co2conc %>%
          # & r.squared >= 0.7 #keeping only trendline with an r.squared above or equal to 0.7. Below that it means that the data are not good quality enough
          # & p.value < 0.05 #keeping only the significant fluxes
   ) %>% 
-  select(ID, Site, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate) %>% #select the column we need, dump the rest
+  select(ID, Turf_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, estimate) %>% #select the column we need, dump the rest
   distinct() #remove duplicate. Because of the nesting, we get one row per Datetime entry. We only need one row per flux. Select() gets rid of Datetime and then distinct() is cleaning those extra rows.
 
 
@@ -66,7 +66,7 @@ fluxes_final <- slopesCO2 %>%
          *3600 #secs to hours
          /1000 #micromol to mmol
   ) %>%  #flux is now in mmol/m^2/h, which is more common
-  select(ID, Site, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, flux)
+  select(ID, Turf_ID, Type, Replicate, Remarks, Date, PARavg, Temp_airavg, r.squared, p.value, flux)
 
 return(fluxes_final)
 
