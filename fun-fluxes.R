@@ -6,13 +6,13 @@
 
 match.flux <- function(raw_flux, field_record){
  co2conc <- full_join(raw_flux, field_record, by = c("Datetime" = "Start"), keep = TRUE) %>% #joining both dataset in one
-    fill(PAR,Temp_air,Site,Type,Replicate,Starting_time,Date,Start,End) %>% #filling all rows (except Remarks) with data from above
+    fill(PAR,Temp_air,Turf_ID,Type,Replicate,Campaign,Starting_time,Date,Start,End) %>% #filling all rows (except Remarks) with data from above
     group_by(Date, Site, Type, Replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
     fill(Remarks) %>% 
     ungroup() %>% 
     mutate(ID = group_indices(., Date, Site, Type, Replicate)) %>% #assigning a unique ID to each flux, useful for plotting uzw
     filter(Datetime <= End) %>% #cropping the part of the flux that is after the End. No need to filter the start because we used by = c("Datetime" = "Start") in full_join
-    select(Datetime, CO2, PAR, Temp_air, Site, Type, Replicate, ID, Remarks, Date)
+    select(Datetime, CO2, PAR, Temp_air, Site, Type, Replicate, Campaign, ID, Remarks, Date)
   
   
   return(co2conc)
