@@ -108,13 +108,14 @@ co2_light_response_three_d <- match.flux(combined, light_response_three_d)
 co2_light_response_incline <- match.flux(combined, light_response_incline)
 
 # Flux calculation
-fluxes_light_response_three-d <- flux.calc(co2_light_response_three-d) %>% 
+fluxes_light_response_three_d <- flux.calc(co2_light_response_three_d) %>% 
 write_csv("Three-D_light-response_c-flux_2020.csv")
 
 fluxes_light_response_incline <- flux.calc(co2_light_response_incline,
                                            chamber_volume = 34.3,
                                            plot_area = 0.08575) %>% 
 write_csv("INCLINE_light-response_c-flux_2020.csv")
+
 
 
 #graph CO2 fluxes to visually check the data
