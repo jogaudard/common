@@ -11,7 +11,9 @@ match.flux <- function(raw_flux, field_record){
     fill(Remarks) %>% 
     ungroup() %>% 
     mutate(ID = group_indices(., Date, Plot_ID, Type, Replicate)) %>% #assigning a unique ID to each flux, useful for plotting uzw
-    filter(Datetime <= End) %>% #cropping the part of the flux that is after the End. No need to filter the start because we used by = c("Datetime" = "Start") in full_join
+    filter(
+      Datetime <= End
+      & Datetime >= Start) %>% #cropping the part of the flux that is after the End and before the Start
     select(Datetime, CO2, PAR, Temp_air, Plot_ID, Type, Replicate, Campaign, ID, Remarks, Date)
   
   
