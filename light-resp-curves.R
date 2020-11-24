@@ -111,13 +111,16 @@ co2_light_response_incline <- match.flux(combined, light_response_incline)
 # Flux calculation
 fluxes_light_response_three_d <- flux.calc(co2_light_response_three_d) %>% 
   rename(
-    turf_ID = plot_ID
+    turfID = plot_ID
   ) %>% 
 write_csv("data/C-Flux/summer_2020/Three-D_light-response_c-flux_2020.csv")
 
 fluxes_light_response_incline <- flux.calc(co2_light_response_incline,
                                            chamber_volume = 34.3,
                                            plot_area = 0.08575) %>% 
+  rename(
+    plotID = plot_ID
+  ) %>% 
 write_csv("data/C-Flux/summer_2020/INCLINE_light-response_c-flux_2020.csv")
 
 
