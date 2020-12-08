@@ -40,7 +40,8 @@ fluxes_final <- co2conc %>%
                  mutate(time = difftime(datetime[1:length(datetime)],datetime[1] , units = "secs"), #add a column with the time difference between each measurements and the beginning of the measurement. Usefull to calculate the slope.
                         PARavg = mean(PAR, na.rm = TRUE), #mean value of PAR for each flux
                         temp_airavg = mean(temp_air, na.rm = TRUE)  #mean value of Temp_air for each flux
-                        + 273.15 #transforming in kelvin for calculation
+                        + 273.15, #transforming in kelvin for calculation
+                        nb_points = nrow()
                  )), 
     fit = map(data, ~lm(CO2 ~ time, data = .)), #fit is a new column in the tibble with the slope of the CO2 concentration vs time (in secs^(-1))
     # slope = map_dbl(fit, "time")
@@ -61,7 +62,7 @@ fluxes_final <- co2conc %>%
          *3600 #secs to hours
          /1000 #micromol to mmol
   ) %>%  #flux is now in mmol/m^2/h, which is more common
-  select(datetime, ID, plot_ID, type, replicate, remarks, date, PARavg, temp_airavg, r.squared, p.value, flux, campaign)
+  select(datetime, ID, plot_ID, type, replicate, remarks, date, PARavg, temp_airavg, r.squared, p.value, nobs, flux, campaign)
 
 return(fluxes_final)
 
