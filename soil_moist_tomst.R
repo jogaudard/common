@@ -32,17 +32,20 @@ soil.moist <- function(rawsoilmoist, soil_temp, soilclass){
 
 # testing the function
 
-data <- read_delim("data_ExampleTMS3.csv", delim = ";", col_names = c("index", "date", "time_zone", "T1", "T2", "T3", "raw_soilmoist", "shake", "errFlag")) %>% 
+data <- read_delim("tomst/data_ExampleTMS3.csv", delim = ";", col_names = c("index", "date", "time_zone", "T1", "T2", "T3", "raw_soilmoist", "shake", "errFlag")) %>% 
   mutate(
     date = dmy_hm(date)
   )
 
 tomst_test <- data %>% 
   mutate(
-    soil_moist_nocorr = soil.moist(raw_soilmoist, T1, "sand")
+    soil_moist_nocorr = soil.moist(raw_soilmoist, T1, "peat")
   )
 
-test_tempcorr <- read_csv("tomst_tempcorr_sand.csv") %>% 
+test_tempcorr <- read_csv("tomst/tomst_tempcorr_peat.csv") %>% 
+  rename(
+    "date" = "Date & time"
+  ) %>% 
   mutate(
     date = mdy_hm(date)
   ) %>% 
