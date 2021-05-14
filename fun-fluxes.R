@@ -6,7 +6,7 @@
 
 match.flux <- function(raw_flux, field_record){
  co2conc <- full_join(raw_flux, field_record, by = c("datetime" = "start"), keep = TRUE) %>% #joining both dataset in one
-    fill(PAR,temp_air,plot_ID,type,replicate,campaign,starting_time,date,start,end,start_window, end_window) %>% #filling all rows (except Remarks) with data from above
+    fill(!remarks) %>% #filling all rows (except Remarks) with data from above
     group_by(date, plot_ID, type, replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
     fill(remarks) %>% 
     ungroup() %>% 
