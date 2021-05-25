@@ -30,35 +30,6 @@ soil.moist <- function(rawsoilmoist, soil_temp, soilclass){
   return(volmoist) #let's just use the soil moisture without temperature correction for now
 }
 
-# testing the function
-
-data <- read_delim("tomst/data_ExampleTMS3.csv", delim = ";", col_names = c("index", "date", "time_zone", "T1", "T2", "T3", "raw_soilmoist", "shake", "errFlag")) %>% 
-  mutate(
-    date = dmy_hm(date)
-  )
-
-tomst_test <- data %>% 
-  mutate(
-    soil_moist_nocorr = soil.moist(raw_soilmoist, T1, "peat")
-  )
-
-test_tempcorr <- read_csv("tomst/tomst_tempcorr_peat.csv") %>% 
-  rename(
-    "date" = "Date & time"
-  ) %>% 
-  mutate(
-    date = mdy_hm(date)
-  ) %>% 
-  rename(soil_moist_corr = "Vol. moisture") %>% 
-  drop_na(date)
-
-#graph the difference between temp correction and no temp correction
-joined_soilmoist <- left_join(test_tempcorr, tomst_test, by = c("date")) %>% 
-  pivot_longer(cols = c(soil_moist_nocorr, soil_moist_corr), names_to = "correction", values_to = "soil_moist")
-
-ggplot(joined_soilmoist, aes(x = date, y = soil_moist)) +
-  geom_line(size = 0.2, aes(color = correction))
-
   
   
 
