@@ -72,8 +72,8 @@ match.flux3 <- function(raw_flux, field_record){
                                 )
   
   co2conc_LRC <- full_join(raw_flux, field_record_LRC, by = c("datetime" = "start"), keep = TRUE) %>% #joining both dataset in one
-    fill(PAR,temp_air,turfID,type,replicate,campaign,starting_time,date,start,end,start_window, end_window) %>% #filling all rows (except Remarks) with data from above
-    group_by(date, turfID, type, replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
+    fill(PAR,temp_air,turfID,type,campaign,starting_time,date,start,end,start_window, end_window) %>% #filling all rows (except Remarks) with data from above
+    group_by(date, turfID, type) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
     fill(comments) %>% 
     # mutate(ID = cur_group_id()) %>% #assigning a unique ID to each flux, useful for plotting uzw
     ungroup() %>% 
@@ -82,8 +82,8 @@ match.flux3 <- function(raw_flux, field_record){
       & datetime >= start) #%>% #cropping the part of the flux that is after the End and before the Start
   # select(datetime, CO2, PAR, temp_air, plot_ID, type, replicate, campaign, ID, remarks, date)
   co2conc_fluxes <- full_join(raw_flux, field_record_fluxes, by = c("datetime" = "start"), keep = TRUE) %>% #joining both dataset in one
-    fill(PAR,temp_air,turfID,type,replicate,campaign,starting_time,date,start,end,start_window, end_window) %>% #filling all rows (except Remarks) with data from above
-    group_by(date, turfID, type, replicate) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
+    fill(PAR,temp_air,turfID,type,campaign,starting_time,date,start,end,start_window, end_window) %>% #filling all rows (except Remarks) with data from above
+    group_by(date, turfID, type) %>% #this part is to fill Remarks while keeping the NA (some fluxes have no remark)
     fill(comments) %>% 
     # mutate(ID = cur_group_id()) %>% #assigning a unique ID to each flux, useful for plotting uzw
     ungroup() %>% 
@@ -92,8 +92,8 @@ match.flux3 <- function(raw_flux, field_record){
       & datetime >= start) #%>% #cropping the part of the flux that is after the End and before the Start
   
   co2conc <- full_join(co2conc_fluxes, co2conc_LRC) %>% 
-    group_by(date, plot_ID, type, replicate) %>% 
-    mutate(ID = cur_group_id()) %>% 
+    group_by(date, turfID, type) %>% 
+    mutate(fluxID = cur_group_id()) %>% 
     ungroup()
   
   
