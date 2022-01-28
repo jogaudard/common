@@ -93,7 +93,7 @@ match.flux3 <- function(raw_flux, field_record){
   
   co2conc <- full_join(co2conc_fluxes, co2conc_LRC) %>% 
     group_by(date, turfID, type) %>% 
-    mutate(ID = cur_group_id()) %>% 
+    mutate(fluxID = cur_group_id()) %>% 
     ungroup()
   
   
