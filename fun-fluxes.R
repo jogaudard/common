@@ -92,7 +92,7 @@ match.flux3 <- function(raw_flux, field_record){
       & datetime >= start) #%>% #cropping the part of the flux that is after the End and before the Start
   
   co2conc <- full_join(co2conc_fluxes, co2conc_LRC) %>% 
-    group_by(date, plot_ID, type) %>% 
+    group_by(date, turfID, type) %>% 
     mutate(ID = cur_group_id()) %>% 
     ungroup()
   
