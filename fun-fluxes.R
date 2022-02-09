@@ -184,7 +184,7 @@ flux.calc2 <- function(co2conc, # dataset of CO2 concentration versus time (outp
       co2conc,
       by = "ID"
     ) %>% 
-    select(ID, slope, p.value, r.squared, adj.r.squared, nobs, PARavg, temp_airavg, plot_ID, type, campaign, remarks, start_window) %>% 
+    select(ID, slope, p.value, r.squared, adj.r.squared, nobs, PARavg, temp_airavg, plot_ID, type, campaign, remarks, start_window, replicate) %>% 
     distinct() %>% 
     rename(
       datetime = start_window
