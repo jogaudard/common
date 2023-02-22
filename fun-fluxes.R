@@ -149,7 +149,8 @@ match.flux4 <- function(raw_flux,
       # mutate(
       fluxID = row_number() #adding an individual ID to each flux, useful to join data or graph the fluxes
     ) %>% 
-    select(start, end, start_window, end_window, fluxID, turfID, type, date)
+    select(!starting_time)
+    # select(start, end, start_window, end_window, fluxID, turfID, type, date)
   
   
   co2conc <- full_join(raw_flux, field_record, by = c("datetime" = "start"), keep = TRUE) %>% #joining both dataset in one
