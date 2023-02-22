@@ -129,8 +129,8 @@ match.flux4 <- function(raw_flux,
   field_record <- field_record %>%
     mutate(
       starting_time = case_when(
-        time_format == "whole" ~ gsub("(\\d{2})(?=\\d{2})", "\\1:", starting_time, perl = TRUE), # to add the : in the time
-        time_format == "time" ~ starting_time
+        time_format == "whole" ~ hms(gsub("(\\d{2})(?=\\d{2})", "\\1:", starting_time, perl = TRUE)), # to add the : in the time
+        time_format == "time" ~ hms(starting_time)
       ),
       date = case_when(
         # !is.na(ymd(date)) ~ ymd(date),
