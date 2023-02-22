@@ -100,7 +100,7 @@ match.flux3 <- function(raw_flux, field_record){
   return(co2conc)
 }
 
-match.flux.4 <- function(raw_flux,
+match.flux4 <- function(raw_flux,
                          field_record,
                          window_length = 90,
                          startcrop = 10,
