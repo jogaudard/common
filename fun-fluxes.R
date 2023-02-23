@@ -665,7 +665,7 @@ fitting.flux <- function(data,
   #   ungroup
   
   r2_general <-function(preds,actual){ 
-    return(1 - (sum((preds - actual)^2)/sum((preds - mean(actual))^2)))
+    return(1 - (sum((actual - preds)^2)/sum((actual - mean(actual))^2)))
   }
   
   model_fit <- CO2_fitting %>%
