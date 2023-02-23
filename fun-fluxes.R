@@ -756,7 +756,8 @@ flux.calc.zhao18 <- function(co2conc, # dataset of slopes per fluxID and environ
   vol = chamber_volume + tube_volume
   
   slopes <- co2conc %>% 
-    select(fluxID, slope, turfID, type, start_window, RMSE, a, b, tz, Cm, Cz, r.squared_slope) %>% 
+    select(fluxID, slope, turfID, type, start_window, RMSE, a, b, tz, Cm, Cz, r.squared_slope, campaign, treatment) %>%
+    # select(!c(datetime, temp_soil, temp_air, CO2,))
     distinct()
   
   means <- co2conc %>% 
