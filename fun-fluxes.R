@@ -798,18 +798,18 @@ flux.calc.zhao18 <- function(co2conc, # dataset of slopes per fluxID and environ
 
 
 LRC.calc <- function(
-    lrc_df,
-    fluxes_df,
-    # group = ,
-    PARfix = 300,
-    PARnull = 0
+    lrc_df, # df with flux values for all the LRC measurements
+    fluxes_df, # df with all the fluxes
+    group = c("siteID", "OTC"), # variables to group the lrc by
+    PARfix = 300, # PAR value to correct NEE fluxes to
+    PARnull = 0 # PAR value to correct ER fluxes to
     )
   
   
   
 {
   coefficients_lrc <- lrc_df %>%
-    group_by(group) %>% 
+    group_by_at(vars(all_of(group))) %>% 
     nest %>% 
     mutate(lm = map(data, ~ lm(flux ~ PARavg + I(PARavg^2), data = .x)),
            table = map(lm, tidy),
@@ -818,7 +818,7 @@ LRC.calc <- function(
            
     ) %>% 
     unnest(table) %>% 
-    select(warming, `(Intercept)`, PARavg, `I(PARavg^2)`, campaign) %>% 
+    select(all_of(group), `(Intercept)`, PARavg, `I(PARavg^2)`) %>% 
     rename(
       origin = "(Intercept)",
       a = "I(PARavg^2)",
@@ -826,6 +826,9 @@ LRC.calc <- function(
     )
   
   flux_corrected_PAR <- fluxes_df %>% 
+    filter(
+      type %in% c("NEE", "ER")
+    ) %>% 
     left_join(coefficients_lrc) %>% 
     mutate(
       PAR_corrected_flux = 
