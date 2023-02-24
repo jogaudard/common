@@ -851,7 +851,7 @@ GEP.calc <- function(
       turfID = as_factor(turfID),
       type = as_factor(type)
     ) %>% 
-    pivot_wider(vars(all_of(id_cols)),
+    pivot_wider(all_of(id_cols),
                 names_from = type,
                 values_from = c(flux, temp_soilavg, datetime, PARavg)
     ) %>% 
@@ -888,7 +888,7 @@ GEP.calc <- function(
       turfID = as_factor(turfID),
       type = as_factor(type)
     ) %>% 
-    pivot_wider(vars(all_of(id_cols)),
+    pivot_wider(all_of(id_cols),
                 names_from = type,
                 values_from = c(datetime, PAR_corrected_flux)
     ) %>% 
