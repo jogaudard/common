@@ -840,62 +840,72 @@ LRC.calc <- function(
     select(!c(a, b, origin))
 }
 
-
 GEP.calc <- function(
     fluxes,
-    group = c("campaign", "turfID")
-    ){
- 
+    id_cols = c("campaign", "turfID")
+){
   
+
   fluxes_GEP <- fluxes %>%
-      mutate(
-      # pairID = case_when(
-      #   type == "NEE" ~ fluxID,
-      #   type == "ER" ~ fluxID-1
-      # ),   # problem with datetime, it is different between ER and NEE. Let's use datetime NEE
-      # datetime = case_when(
-      #   type == "NEE" ~ datetime,
-      #   type == "ER" ~ NA_real_
-      # ),
+    mutate(
       turfID = as_factor(turfID),
       type = as_factor(type)
     ) %>% 
-    # select(PARavg, temp_soilavg, turfID, type, datetime, flux) %>%
-    # select(!c(fluxID, adj.r.squared, p.value)) %>%
-    # select(!c(fluxID)) %>% 
-    # pivot_wider(names_from = type, values_from = PARavg, names_prefix = "PARavg_") %>% 
-    # select(!c(PAR_corrected_flux)) %>%
-    # select(campaign, turfID, date, type, corrected_flux) %>%
-    pivot_wider(names_from = type, values_from = c(flux, temp_soilavg, datetime, PARavg)) %>% 
+    pivot_wider(vars(all_of(id_cols)),
+                names_from = type,
+                values_from = c(flux, temp_soilavg, datetime, PARavg)
+    ) %>% 
     
-    # pivot_wider(names_from = type, values_from = c(flux, temp_soilavg)) %>% 
     rename(
       ER = flux_ER,
       NEE = flux_NEE
     ) %>%
     mutate(
-      GPP = NEE - ER
+      GEP = NEE - ER
     ) %>% 
-    pivot_longer(c(ER, NEE, GPP), names_to = "type", values_to = "flux") %>% 
+    pivot_longer(c(ER, NEE, GEP), names_to = "type", values_to = "flux") %>% 
     mutate(
       temp_soil = case_when(
         type == "ER" ~ temp_soilavg_ER,
         type == "NEE" ~ temp_soilavg_NEE,
-        type == "GPP" ~ rowMeans(select(., c(temp_soilavg_NEE, temp_soilavg_ER)), na.rm = TRUE)
+        type == "GEP" ~ rowMeans(select(., c(temp_soilavg_NEE, temp_soilavg_ER)), na.rm = TRUE)
       ),
       PARavg = case_when(
         type == "ER" ~ PARavg_ER,
         type == "NEE" ~ PARavg_NEE,
-        type == "GPP" ~ PARavg_NEE
+        type == "GEP" ~ PARavg_NEE
       ),
       datetime = case_when(
         type == "ER" ~ datetime_ER,
         type == "NEE" ~ datetime_NEE,
-        type == "GPP" ~ datetime_NEE
+        type == "GEP" ~ datetime_NEE
       )
     ) %>% 
-    select(!c(temp_soilavg_ER, temp_soilavg_NEE, PARavg_ER, PARavg_NEE, datetime_ER, datetime_NEE, pairID))
+    select(!c(temp_soilavg_NEE, temp_soilavg_ER, datetime_NEE, datetime_ER, PARavg_NEE, PARavg_ER))
   
-  return(fluxes_GPP)
+  PAR_corrected_GEP <- fluxes %>% 
+    mutate(
+      turfID = as_factor(turfID),
+      type = as_factor(type)
+    ) %>% 
+    pivot_wider(vars(all_of(id_cols)),
+                names_from = type,
+                values_from = c(datetime, PAR_corrected_flux)
+    ) %>% 
+    
+    rename(
+      ER = PAR_corrected_flux_ER,
+      NEE = PAR_corrected_flux_NEE
+    ) %>%
+    mutate(
+      GEP = NEE - ER
+    ) %>% 
+    pivot_longer(c(ER, NEE, GEP), names_to = "type", values_to = "PAR_corrected_flux") %>% 
+    select(!c(datetime_NEE, datetime_ER))
+  
+  fluxes_GEP <- fluxes_GEP %>% 
+    left_join(PAR_corrected_GEP) 
+
+  return(fluxes_GEP)
   
 }
