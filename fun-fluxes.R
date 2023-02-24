@@ -800,7 +800,7 @@ flux.calc.zhao18 <- function(co2conc, # dataset of slopes per fluxID and environ
 LRC.calc <- function(
     lrc_df,
     fluxes_df,
-    group = ,
+    # group = ,
     PARfix = 300,
     PARnull = 0
     )
