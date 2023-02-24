@@ -836,5 +836,66 @@ LRC.calc <- function(
           type == "NEE" ~ flux + a * (PARfix^2 - PARavg^2) + b * (PARfix - PARavg),
           type == "ER" ~ flux + a * (PARnull^2 - PARavg^2) + b * (PARnull - PARavg)
         )
-    )
+    ) %>% 
+    select(!c(a, b, origin))
+}
+
+
+GEP.calc <- function(
+    fluxes,
+    group = c("campaign", "turfID")
+    ){
+ 
+  
+  fluxes_GEP <- fluxes %>%
+      mutate(
+      # pairID = case_when(
+      #   type == "NEE" ~ fluxID,
+      #   type == "ER" ~ fluxID-1
+      # ),   # problem with datetime, it is different between ER and NEE. Let's use datetime NEE
+      # datetime = case_when(
+      #   type == "NEE" ~ datetime,
+      #   type == "ER" ~ NA_real_
+      # ),
+      turfID = as_factor(turfID),
+      type = as_factor(type)
+    ) %>% 
+    # select(PARavg, temp_soilavg, turfID, type, datetime, flux) %>%
+    # select(!c(fluxID, adj.r.squared, p.value)) %>%
+    # select(!c(fluxID)) %>% 
+    # pivot_wider(names_from = type, values_from = PARavg, names_prefix = "PARavg_") %>% 
+    # select(!c(PAR_corrected_flux)) %>%
+    # select(campaign, turfID, date, type, corrected_flux) %>%
+    pivot_wider(names_from = type, values_from = c(flux, temp_soilavg, datetime, PARavg)) %>% 
+    
+    # pivot_wider(names_from = type, values_from = c(flux, temp_soilavg)) %>% 
+    rename(
+      ER = flux_ER,
+      NEE = flux_NEE
+    ) %>%
+    mutate(
+      GPP = NEE - ER
+    ) %>% 
+    pivot_longer(c(ER, NEE, GPP), names_to = "type", values_to = "flux") %>% 
+    mutate(
+      temp_soil = case_when(
+        type == "ER" ~ temp_soilavg_ER,
+        type == "NEE" ~ temp_soilavg_NEE,
+        type == "GPP" ~ rowMeans(select(., c(temp_soilavg_NEE, temp_soilavg_ER)), na.rm = TRUE)
+      ),
+      PARavg = case_when(
+        type == "ER" ~ PARavg_ER,
+        type == "NEE" ~ PARavg_NEE,
+        type == "GPP" ~ PARavg_NEE
+      ),
+      datetime = case_when(
+        type == "ER" ~ datetime_ER,
+        type == "NEE" ~ datetime_NEE,
+        type == "GPP" ~ datetime_NEE
+      )
+    ) %>% 
+    select(!c(temp_soilavg_ER, temp_soilavg_NEE, PARavg_ER, PARavg_NEE, datetime_ER, datetime_NEE, pairID))
+  
+  return(fluxes_GPP)
+  
 }
