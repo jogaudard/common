@@ -887,7 +887,7 @@ GEP.calc <- function(
         type == "GEP" ~ NA_real_ # cannot provide this
       )
     ) %>% 
-    select(!c(temp_soilavg_NEE, temp_soilavg_ER, datetime_NEE, datetime_ER, PARavg_NEE, PARavg_ER))
+    select(!c(temp_soilavg_NEE, temp_soilavg_ER, temp_airavg_NEE, temp_airavg_ER, datetime_NEE, datetime_ER, PARavg_NEE, PARavg_ER))
   
   PAR_corrected_GEP <- fluxes %>% 
     mutate(
