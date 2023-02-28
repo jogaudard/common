@@ -881,7 +881,7 @@ GEP.calc <- function(
         type == "NEE" ~ datetime_NEE,
         type == "GEP" ~ datetime_NEE
       ),
-      temp_airavg = case_when(
+      temp_air = case_when(
         type == "ER" ~ temp_airavg_ER,
         type == "NEE" ~ temp_airavg_NEE,
         type == "GEP" ~ NA_real_ # cannot provide this
