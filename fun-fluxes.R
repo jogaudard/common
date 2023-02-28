@@ -154,8 +154,10 @@ match.flux4 <- function(raw_flux,
   
   
   co2conc <- full_join(raw_flux, field_record, by = c("datetime" = "start"), keep = TRUE) %>% #joining both dataset in one
-    fill(PAR,temp_air, temp_soil, turfID,type,start,end,start_window, end_window, fluxID, date, campaign, treatment, comments) %>% #filling all rows with data from above
-    
+    fill(PAR,temp_air, temp_soil, turfID,type,start,end,start_window, end_window, fluxID, date, campaign, treatment) %>% #filling all rows with data from above
+    group_by(date, turfID, type) %>% #this part is to fill comments while keeping the NA (some fluxes have no comment)
+    fill(comments) %>% 
+    ungroup() %>%
     filter(
       datetime <= end
       & datetime >= start) %>% #cropping the part of the flux that is after the End and before the Start
