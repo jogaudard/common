@@ -764,8 +764,8 @@ flux.calc.zhao18 <- function(co2conc, # dataset of slopes per fluxID and environ
     group_by(fluxID) %>% 
     summarise(
       PARavg = mean(PAR, na.rm = TRUE), #mean value of PAR for each flux
-      temp_airavg = mean(temp_air, na.rm = TRUE)  #mean value of temp_air for each flux
-      + 273.15, #transforming in kelvin for calculation
+      temp_airavg = mean(temp_air, na.rm = TRUE),  #mean value of temp_air for each flux
+      # + 273.15, #transforming in kelvin for calculation
       temp_soilavg = mean(temp_soil, na.rm = TRUE) #mean value of temp_soil for each flux
     ) %>% 
     ungroup()
@@ -781,13 +781,9 @@ flux.calc.zhao18 <- function(co2conc, # dataset of slopes per fluxID and environ
       datetime = start_window
     ) %>% 
     mutate(
-      flux = (slope * atm_pressure * vol)/(R * temp_airavg * plot_area) #gives flux in micromol/s/m^2
+      flux = (slope * atm_pressure * vol)/(R * (temp_airavg + 273.15) * plot_area) #gives flux in micromol/s/m^2
       *3600 #secs to hours
       /1000 #micromol to mmol
-      # PARavg = case_when(
-      #   type == "ER" ~ NA_real_,
-      #   type == "NEE" ~ PARavg
-      # )
     ) %>% #flux is now in mmol/m^2/h, which is more common
     arrange(datetime) %>% 
     select(!c(slope))
@@ -871,7 +867,7 @@ GEP.calc <- function(
         type == "GEP" ~ NA_real_ # cannot provide this
         # type == "GEP" ~ rowMeans(select(., c(temp_soilavg_NEE, temp_soilavg_ER)), na.rm = TRUE)
       ),
-      PARavg = case_when(
+      PAR = case_when(
         type == "ER" ~ PARavg_ER,
         type == "NEE" ~ PARavg_NEE,
         type == "GEP" ~ PARavg_NEE
