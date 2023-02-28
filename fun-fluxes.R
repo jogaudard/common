@@ -154,7 +154,7 @@ match.flux4 <- function(raw_flux,
   
   
   co2conc <- full_join(raw_flux, field_record, by = c("datetime" = "start"), keep = TRUE) %>% #joining both dataset in one
-    fill(PAR,temp_air, temp_soil, turfID,type,start,end,start_window, end_window, fluxID, date, campaign, treatment) %>% #filling all rows with data from above
+    fill(PAR,temp_air, temp_soil, turfID,type,start,end,start_window, end_window, fluxID, date, campaign, treatment, comments) %>% #filling all rows with data from above
     
     filter(
       datetime <= end
