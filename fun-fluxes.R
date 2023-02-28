@@ -790,7 +790,7 @@ flux.calc.zhao18 <- function(co2conc, # dataset of slopes per fluxID and environ
       # )
     ) %>% #flux is now in mmol/m^2/h, which is more common
     arrange(datetime) %>% 
-    select(!c(slope, temp_airavg))
+    select(!c(slope))
   
   return(fluxes_final)
   
@@ -853,7 +853,7 @@ GEP.calc <- function(
     ) %>% 
     pivot_wider(all_of(id_cols),
                 names_from = type,
-                values_from = c(flux, temp_soilavg, datetime, PARavg)
+                values_from = c(flux, temp_soilavg, datetime, PARavg, temp_airavg)
     ) %>% 
     
     rename(
@@ -868,7 +868,8 @@ GEP.calc <- function(
       temp_soil = case_when(
         type == "ER" ~ temp_soilavg_ER,
         type == "NEE" ~ temp_soilavg_NEE,
-        type == "GEP" ~ rowMeans(select(., c(temp_soilavg_NEE, temp_soilavg_ER)), na.rm = TRUE)
+        type == "GEP" ~ NA_real_ # cannot provide this
+        # type == "GEP" ~ rowMeans(select(., c(temp_soilavg_NEE, temp_soilavg_ER)), na.rm = TRUE)
       ),
       PARavg = case_when(
         type == "ER" ~ PARavg_ER,
@@ -879,6 +880,11 @@ GEP.calc <- function(
         type == "ER" ~ datetime_ER,
         type == "NEE" ~ datetime_NEE,
         type == "GEP" ~ datetime_NEE
+      ),
+      temp_airavg = case_when(
+        type == "ER" ~ temp_airavg_ER,
+        type == "NEE" ~ temp_airavg_NEE,
+        type == "GEP" ~ NA_real_ # cannot provide this
       )
     ) %>% 
     select(!c(temp_soilavg_NEE, temp_soilavg_ER, datetime_NEE, datetime_ER, PARavg_NEE, PARavg_ER))
