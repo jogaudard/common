@@ -913,3 +913,82 @@ GEP.calc <- function(
   return(fluxes_GEP)
   
 }
+
+GEP.calc2 <- function(
+    fluxes,
+    id_cols = c("campaign", "turfID"),
+    meta_cols = c(
+      "plotID",
+      "siteID",
+      "blockID",
+      "plot",
+      "OTC",
+      "treatment",
+      "precipitation_1960-1990",
+      "precipitation_2009-2019",
+      "temperature_1960-1990",
+      "temperature_2009-2019",
+      "coordinate_N",
+      "coordinate_E",
+      "elevation",
+      "slope",
+      "aspect"
+    )
+){
+  
+  fluxes <- fluxes_INCLINE_2022
+  
+  fluxes_GEP <- fluxes %>%
+    mutate(
+      turfID = as_factor(turfID),
+      type = as_factor(type)
+    ) %>% 
+    pivot_wider(all_of(id_cols),
+                names_from = type,
+                values_from = c(flux, datetime, PARavg)
+    ) %>% 
+    
+    rename(
+      ER = flux_ER,
+      NEE = flux_NEE,
+      PARavg = PARavg_NEE,
+      datetime = datetime_NEE
+    ) %>%
+    mutate(
+      flux = NEE - ER,
+      type = "GEP"
+    ) %>% 
+    select(datetime, all_of(id_cols), PARavg, type, flux)
+  
+  PAR_corrected_GEP <- fluxes %>% 
+    mutate(
+      turfID = as_factor(turfID),
+      type = as_factor(type)
+    ) %>% 
+    pivot_wider(all_of(id_cols),
+                names_from = type,
+                values_from = c(datetime, PAR_corrected_flux)
+    ) %>% 
+    
+    rename(
+      ER = PAR_corrected_flux_ER,
+      NEE = PAR_corrected_flux_NEE,
+      datetime = datetime_NEE
+    ) %>%
+    mutate(
+      PAR_corrected_flux = NEE - ER,
+      type = "GEP"
+    ) %>% 
+    select(datetime, all_of(id_cols), type, PAR_corrected_flux)
+  
+  
+  fluxes_GEP <- fluxes_GEP %>% 
+    left_join(PAR_corrected_GEP) %>% 
+    full_join(fluxes) %>% 
+    purrrlyr::slice_rows(id_cols) %>% 
+    fill(all_of(meta_cols), .direction = "up") %>% 
+    ungroup()
+  
+  return(fluxes_GEP)
+  
+}
