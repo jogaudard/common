@@ -344,6 +344,7 @@ fitting.flux_nocut2 <- function(data,
                                 # noise = 10, # noise of the setup in ppm
                                 # r.squared_threshold = -100, #threshold to discard data based on r.squared of the linear fit at tz over the kept part
                                 RMSE_threshold = 25, # threshold above which data are discarded
+                                NRMSE_method = "mean", # Defines how NRMSE should be calculated. Either mean, sd, or range
                                 NRMSE_threshold = 0.1, # threshold above which data are labelled as bad fit
                                 cor_threshold = 0.5, # delimits the window in which CO2 is considered not correlated with time
                                 b_threshold = 1, # this value and its opposite define a window out of which data are being discarded
@@ -553,10 +554,15 @@ fitting.flux_nocut2 <- function(data,
       cor_coef = cor(data$CO2, data$time),
       # r.squared = r2_general(data$fit, data$CO2),
       RMSE = sqrt((1/length(data$time)) * sum((data$fit - data$CO2)^2)),
-      NRMSE = RMSE / (max(data$CO2) - min(data$CO2)),
+      # NRMSE = RMSE / (max(data$CO2) - min(data$CO2)),
       rangeCO2 = max(data$CO2) - min(data$CO2),
       meanCO2 = mean(data$CO2),
       sdCO2 = sd(data$CO2),
+      NRMSE = case_when(
+        NRMSE_method == "range" ~ RMSE / rangeCO2,
+        NRMSE_method == "mean" ~ RMSE / meanCO2,
+        NRMSE_method == "sd" ~ RMSE / sdCO2
+      ),
       # RMSE = myfn2(time = data$time, CO2 = data$CO2, a = data$a, b = data$b, Cm = data$Cm, Cz = data$Cz, tz = data$tz - data$time_corr),
       # norm_RMSE = RMSE / (max(data$CO2) - min(data$CO2)),
       # r.squared_slope = r2_general(data$fit_slope, data$CO2),
